@@ -10,6 +10,13 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <ProgressBar
+            android:id="@+id/contact_details_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="visible" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -23,6 +30,7 @@
                 android:layout_marginTop="@dimen/margin_16dp"
                 android:backgroundTint="@color/mint"
                 android:importantForAccessibility="no"
+                android:visibility="gone"
                 tools:src="@tools:sample/avatars" />
 
             <com.google.android.material.textview.MaterialTextView
@@ -33,6 +41,7 @@
                 android:layout_marginHorizontal="@dimen/margin_16dp"
                 android:layout_marginTop="@dimen/margin_16dp"
                 android:textAppearance="?attr/textAppearanceHeadline6"
+                android:visibility="gone"
                 tools:text="@tools:sample/full_names" />
 
         </LinearLayout>
@@ -46,6 +55,7 @@
             android:drawableStart="@drawable/ic_baseline_phone_android_24"
             android:drawablePadding="@dimen/margin_8dp"
             android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:visibility="gone"
             tools:text="@tools:sample/us_phones" />
 
         <com.google.android.material.textview.MaterialTextView
@@ -57,6 +67,7 @@
             android:drawableStart="@drawable/ic_baseline_phone_android_24"
             android:drawablePadding="@dimen/margin_8dp"
             android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:visibility="gone"
             tools:text="@tools:sample/us_phones" />
 
         <com.google.android.material.textview.MaterialTextView
@@ -68,6 +79,7 @@
             android:drawableStart="@drawable/ic_baseline_email_24"
             android:drawablePadding="@dimen/margin_8dp"
             android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:visibility="gone"
             tools:text="example@example.com" />
 
         <com.google.android.material.textview.MaterialTextView
@@ -79,6 +91,7 @@
             android:drawableStart="@drawable/ic_baseline_email_24"
             android:drawablePadding="@dimen/margin_8dp"
             android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:visibility="gone"
             tools:text="example@example.com" />
 
         <com.google.android.material.textview.MaterialTextView
@@ -88,6 +101,7 @@
             android:layout_marginHorizontal="@dimen/margin_16dp"
             android:layout_marginVertical="@dimen/margin_8dp"
             android:textAppearance="?attr/textAppearanceSubtitle2"
+            android:visibility="gone"
             tools:text="@string/example_long_description" />
 
     </LinearLayout>
