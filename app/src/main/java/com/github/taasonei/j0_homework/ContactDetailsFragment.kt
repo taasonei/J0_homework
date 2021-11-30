@@ -1,5 +1,6 @@
 package com.github.taasonei.j0_homework
 
+import android.app.AlarmManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -13,10 +14,16 @@ import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import com.github.taasonei.j0_homework.databinding.FragmentContactDetailsBinding
 import com.github.taasonei.j0_homework.model.Contact
+import com.github.taasonei.j0_homework.notification.IntentUtils
 import com.github.taasonei.j0_homework.service.ContactService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.Month
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 class ContactDetailsFragment : Fragment() {
 
@@ -24,8 +31,12 @@ class ContactDetailsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var contactService: ContactService? = null
-    private var contactId: Int? = null
+    private val contactId: Int by lazy {
+        requireArguments().getInt(ContactListFragment.CONTACT_ID_TAG)
+    }
     private var contact: Contact? = null
+
+    private val intentUtils = IntentUtils()
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -34,7 +45,7 @@ class ContactDetailsFragment : Fragment() {
 
             viewLifecycleOwner.lifecycleScope.launch {
                 contact = withContext(Dispatchers.IO) {
-                    contactService?.getContactById(arguments?.getInt(ContactListFragment.CONTACT_ID_TAG))
+                    contactService?.getContactById(contactId)
                 }
                 setContactData(contact)
             }
@@ -51,9 +62,6 @@ class ContactDetailsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentContactDetailsBinding.inflate(inflater, container, false)
-
-        contactId = arguments?.getInt(ContactListFragment.CONTACT_ID_TAG)
-
         return binding.root
     }
 
@@ -66,6 +74,14 @@ class ContactDetailsFragment : Fragment() {
             Context.BIND_AUTO_CREATE
         )
 
+        val switch = binding.contactDetailsBirthdayReminder
+        switch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                setAlarm()
+            } else {
+                cancelAlarm()
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -84,7 +100,11 @@ class ContactDetailsFragment : Fragment() {
             binding.contactDetailsPhone2.text = contact.phone.last()
             binding.contactDetailsEmail1.text = contact.email.first()
             binding.contactDetailsEmail2.text = contact.email.last()
+            binding.contactDetailsBirthday.text =
+                DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(contact.birthday)
             binding.contactDetailsDescription.text = contact.description
+            binding.contactDetailsBirthdayReminder.isChecked =
+                intentUtils.isPendingIntentCreated(requireContext(), contact, contactId)
         }
     }
 
@@ -96,7 +116,53 @@ class ContactDetailsFragment : Fragment() {
         binding.contactDetailsPhone2.visibility = View.VISIBLE
         binding.contactDetailsEmail1.visibility = View.VISIBLE
         binding.contactDetailsEmail2.visibility = View.VISIBLE
+        binding.contactDetailsBirthday.visibility = View.VISIBLE
+        binding.contactDetailsBirthdayReminder.visibility = View.VISIBLE
         binding.contactDetailsDescription.visibility = View.VISIBLE
+    }
+
+    private fun setAlarm() {
+        val contact = contact ?: return
+
+        val alarmManager: AlarmManager =
+            requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val pendingIntent =
+            intentUtils.getPendingIntent(requireContext(), contact, contactId)
+
+        val currentDate = LocalDate.now()
+        var birthdayDate = LocalDate.of(
+            currentDate.year,
+            contact.birthday.month,
+            contact.birthday.dayOfMonth
+        )
+        if (birthdayDate.isBefore(currentDate)) {
+            birthdayDate = when {
+                birthdayDate.month == Month.FEBRUARY && birthdayDate.dayOfMonth == 29 -> {
+                    when {
+                        birthdayDate.isLeapYear -> birthdayDate.plusYears(4)
+                        else -> birthdayDate.plusYears(4L - birthdayDate.year % 4)
+                    }
+                }
+                else -> birthdayDate.plusYears(1)
+            }
+        }
+
+        alarmManager.set(
+            AlarmManager.RTC_WAKEUP,
+            birthdayDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
+            pendingIntent
+        )
+    }
+
+    private fun cancelAlarm() {
+        val contact = contact ?: return
+
+        val alarmManager: AlarmManager =
+            requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val pendingIntent =
+            intentUtils.getPendingIntent(requireContext(), contact, contactId)
+        alarmManager.cancel(pendingIntent)
+        pendingIntent.cancel()
     }
 
 }
