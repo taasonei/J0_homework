@@ -12,14 +12,15 @@
         <service
             android:name=".service.ContactService"
             android:enabled="true"
-            android:exported="false"></service>
-
+            android:exported="false" ></service>
+        <receiver android:name=".notification.AlarmReceiver">
+        </receiver>
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

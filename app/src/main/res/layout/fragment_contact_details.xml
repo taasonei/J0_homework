@@ -15,7 +15,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="visible" />
+            android:visibility="visible"
+            tools:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -31,7 +32,8 @@
                 android:backgroundTint="@color/mint"
                 android:importantForAccessibility="no"
                 android:visibility="gone"
-                tools:src="@tools:sample/avatars" />
+                tools:src="@tools:sample/avatars"
+                tools:visibility="visible" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/contact_details_name"
@@ -42,7 +44,8 @@
                 android:layout_marginTop="@dimen/margin_16dp"
                 android:textAppearance="?attr/textAppearanceHeadline6"
                 android:visibility="gone"
-                tools:text="@tools:sample/full_names" />
+                tools:text="@tools:sample/full_names"
+                tools:visibility="visible" />
 
         </LinearLayout>
 
@@ -56,7 +59,8 @@
             android:drawablePadding="@dimen/margin_8dp"
             android:textAppearance="?attr/textAppearanceSubtitle1"
             android:visibility="gone"
-            tools:text="@tools:sample/us_phones" />
+            tools:text="@tools:sample/us_phones"
+            tools:visibility="visible" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/contact_details_phone_2"
@@ -68,7 +72,8 @@
             android:drawablePadding="@dimen/margin_8dp"
             android:textAppearance="?attr/textAppearanceSubtitle1"
             android:visibility="gone"
-            tools:text="@tools:sample/us_phones" />
+            tools:text="@tools:sample/us_phones"
+            tools:visibility="visible" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/contact_details_email_1"
@@ -80,7 +85,8 @@
             android:drawablePadding="@dimen/margin_8dp"
             android:textAppearance="?attr/textAppearanceSubtitle1"
             android:visibility="gone"
-            tools:text="example@example.com" />
+            tools:text="example@example.com"
+            tools:visibility="visible" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/contact_details_email_2"
@@ -92,7 +98,32 @@
             android:drawablePadding="@dimen/margin_8dp"
             android:textAppearance="?attr/textAppearanceSubtitle1"
             android:visibility="gone"
-            tools:text="example@example.com" />
+            tools:text="example@example.com"
+            tools:visibility="visible" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/contact_details_birthday"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/margin_16dp"
+            android:layout_marginTop="@dimen/margin_8dp"
+            android:drawableStart="@drawable/ic_baseline_cake_24"
+            android:drawablePadding="@dimen/margin_8dp"
+            android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:visibility="gone"
+            tools:text="@tools:sample/date/ddmmyy"
+            tools:visibility="visible"/>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/contact_details_birthday_reminder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/margin_16dp"
+            android:layout_marginTop="@dimen/margin_8dp"
+            android:text="@string/remind_about_birthday"
+            android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/contact_details_description"
@@ -102,7 +133,8 @@
             android:layout_marginVertical="@dimen/margin_8dp"
             android:textAppearance="?attr/textAppearanceSubtitle2"
             android:visibility="gone"
-            tools:text="@string/example_long_description" />
+            tools:text="@string/example_long_description"
+            tools:visibility="visible" />
 
     </LinearLayout>
 
