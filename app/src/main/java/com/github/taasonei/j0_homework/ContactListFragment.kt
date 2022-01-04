@@ -34,7 +34,6 @@ class ContactListFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var contactId: String? = null
-    private val defaultPhoto = R.drawable.example_avatar
 
     private var contactService: ContactService? = null
     private var contactList: List<ShortContact>? = null
@@ -66,6 +65,7 @@ class ContactListFragment : Fragment() {
             contactService = null
         }
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -111,7 +111,7 @@ class ContactListFragment : Fragment() {
             if (contacts.first().photo.isNotBlank()) {
                 binding.contactItemPhoto.setImageURI(Uri.parse(contacts.first().photo))
             } else {
-                binding.contactItemPhoto.setImageResource(defaultPhoto)
+                binding.contactItemPhoto.setImageResource(R.drawable.example_avatar)
             }
         }
     }

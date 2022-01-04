@@ -13,10 +13,10 @@ class IntentUtils {
         const val CONTACT_NAME = "CONTACT_NAME"
     }
 
-    private fun getIntent(context: Context, contact: DetailedContact, contactId: String): Intent {
+    private fun getIntent(context: Context, contact: DetailedContact): Intent {
         val intent = Intent(context, AlarmReceiver::class.java)
         intent.action = SET_ALARM
-        intent.putExtra(ContactListFragment.CONTACT_ID_TAG, contactId)
+        intent.putExtra(ContactListFragment.CONTACT_ID_TAG, contact.id)
         intent.putExtra(CONTACT_NAME, contact.name)
         return intent
     }
@@ -37,20 +37,20 @@ class IntentUtils {
         }
     }
 
-    fun getPendingIntent(context: Context, contact: DetailedContact, contactId: String): PendingIntent {
+    fun getPendingIntent(context: Context, contact: DetailedContact): PendingIntent {
         return PendingIntent.getBroadcast(
             context,
-            contactId.toInt(),
-            getIntent(context, contact, contactId),
+            contact.hashCode(),
+            getIntent(context, contact),
             getPendingIntentFlagUpdateCurrent()
         )
     }
 
-    fun isPendingIntentCreated(context: Context, contact: DetailedContact, contactId: String): Boolean {
+    fun isPendingIntentCreated(context: Context, contact: DetailedContact): Boolean {
         return PendingIntent.getBroadcast(
             context,
-            contactId.toInt(),
-            getIntent(context, contact, contactId),
+            contact.hashCode(),
+            getIntent(context, contact),
             getPendingIntentFlagNoCreate()
         ) != null
     }
