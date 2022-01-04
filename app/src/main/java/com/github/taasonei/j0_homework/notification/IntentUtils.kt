@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.github.taasonei.j0_homework.ContactListFragment
-import com.github.taasonei.j0_homework.model.Contact
+import com.github.taasonei.j0_homework.model.DetailedContact
 
 class IntentUtils {
     companion object {
@@ -13,7 +13,7 @@ class IntentUtils {
         const val CONTACT_NAME = "CONTACT_NAME"
     }
 
-    private fun getIntent(context: Context, contact: Contact, contactId: Int): Intent {
+    private fun getIntent(context: Context, contact: DetailedContact, contactId: String): Intent {
         val intent = Intent(context, AlarmReceiver::class.java)
         intent.action = SET_ALARM
         intent.putExtra(ContactListFragment.CONTACT_ID_TAG, contactId)
@@ -37,19 +37,19 @@ class IntentUtils {
         }
     }
 
-    fun getPendingIntent(context: Context, contact: Contact, contactId: Int): PendingIntent {
+    fun getPendingIntent(context: Context, contact: DetailedContact, contactId: String): PendingIntent {
         return PendingIntent.getBroadcast(
             context,
-            contactId,
+            contactId.toInt(),
             getIntent(context, contact, contactId),
             getPendingIntentFlagUpdateCurrent()
         )
     }
 
-    fun isPendingIntentCreated(context: Context, contact: Contact, contactId: Int): Boolean {
+    fun isPendingIntentCreated(context: Context, contact: DetailedContact, contactId: String): Boolean {
         return PendingIntent.getBroadcast(
             context,
-            contactId,
+            contactId.toInt(),
             getIntent(context, contact, contactId),
             getPendingIntentFlagNoCreate()
         ) != null

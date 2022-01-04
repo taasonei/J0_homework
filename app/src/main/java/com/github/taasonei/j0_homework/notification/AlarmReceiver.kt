@@ -20,6 +20,8 @@ class AlarmReceiver : BroadcastReceiver() {
         const val CHANNEL_BIRTHDAY = "CHANNEL_BIRTHDAY"
     }
 
+    private val notifyId = 1
+
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == IntentUtils.SET_ALARM) {
             val notificationManager =
@@ -33,9 +35,9 @@ class AlarmReceiver : BroadcastReceiver() {
             }
 
             val name = intent.extras?.getString(IntentUtils.CONTACT_NAME)
-            val id = intent.extras?.getInt(ContactListFragment.CONTACT_ID_TAG) ?: -1
+            val contactId = intent.extras?.getString(ContactListFragment.CONTACT_ID_TAG)
             val bundle = Bundle()
-            bundle.putInt(ContactListFragment.CONTACT_ID_TAG, id)
+            bundle.putString(ContactListFragment.CONTACT_ID_TAG, contactId)
 
             val pendingIntentFlag = when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ->
@@ -43,7 +45,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 else -> PendingIntent.FLAG_UPDATE_CURRENT
             }
 
-            val pendingIntent: PendingIntent = if (id != -1) {
+            val pendingIntent: PendingIntent = if (!contactId.isNullOrEmpty()) {
                 NavDeepLinkBuilder(context)
                     .setGraph(R.navigation.nav_graph)
                     .setDestination(R.id.contactDetailsFragment)
@@ -67,7 +69,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
 
-            notificationManager.notify(id, builder.build())
+            notificationManager.notify(contactId, notifyId, builder.build())
         }
     }
 

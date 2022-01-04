@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import androidx.fragment.app.Fragment
@@ -13,7 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import com.github.taasonei.j0_homework.databinding.FragmentContactDetailsBinding
-import com.github.taasonei.j0_homework.model.Contact
+import com.github.taasonei.j0_homework.model.DetailedContact
 import com.github.taasonei.j0_homework.notification.IntentUtils
 import com.github.taasonei.j0_homework.service.ContactService
 import kotlinx.coroutines.Dispatchers
@@ -31,10 +32,13 @@ class ContactDetailsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var contactService: ContactService? = null
-    private val contactId: Int by lazy {
-        requireArguments().getInt(ContactListFragment.CONTACT_ID_TAG)
+    private val contactId: String by lazy {
+        requireArguments().getString(ContactListFragment.CONTACT_ID_TAG)!!
     }
-    private var contact: Contact? = null
+
+    private var contact: DetailedContact? = null
+    private val defaultText = ""
+    private val defaultPhoto = R.drawable.example_avatar
 
     private val intentUtils = IntentUtils()
 
@@ -91,18 +95,52 @@ class ContactDetailsFragment : Fragment() {
         requireActivity().unbindService(connection)
     }
 
-    private fun setContactData(contact: Contact?) {
+    private fun setContactData(contact: DetailedContact?) {
         if (contact != null) {
             hideProgressBar()
             binding.contactDetailsName.text = contact.name
-            binding.contactDetailsPhoto.setImageResource(contact.photo)
             binding.contactDetailsPhone1.text = contact.phone.first()
-            binding.contactDetailsPhone2.text = contact.phone.last()
-            binding.contactDetailsEmail1.text = contact.email.first()
-            binding.contactDetailsEmail2.text = contact.email.last()
-            binding.contactDetailsBirthday.text =
-                DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(contact.birthday)
-            binding.contactDetailsDescription.text = contact.description
+
+            binding.contactDetailsPhone2.text = if (contact.phone.size > 1) {
+                contact.phone.last()
+            } else {
+                defaultText
+            }
+
+            if (contact.photo.isNotBlank()) {
+                binding.contactDetailsPhoto.setImageURI(Uri.parse(contact.photo))
+            } else {
+                binding.contactDetailsPhoto.setImageResource(defaultPhoto)
+            }
+
+            binding.contactDetailsDescription.text = if (contact.description.isNotEmpty()) {
+                contact.description
+            } else {
+                defaultText
+            }
+
+            when (contact.email.isNotEmpty()) {
+                true -> {
+                    binding.contactDetailsEmail1.text = contact.email.first()
+                    when (contact.email.size > 1) {
+                        true -> binding.contactDetailsEmail2.text = contact.email.last()
+                        else -> binding.contactDetailsEmail2.text = defaultText
+                    }
+                }
+                else -> {
+                    binding.contactDetailsEmail1.text = defaultText
+                    binding.contactDetailsEmail2.text = defaultText
+                }
+            }
+
+            if (contact.birthday != null) {
+                binding.contactDetailsBirthday.text =
+                    DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(contact.birthday)
+                binding.contactDetailsBirthdayReminder.isEnabled = true
+            } else {
+                binding.contactDetailsBirthday.text = defaultText
+                binding.contactDetailsBirthdayReminder.isEnabled = false
+            }
             binding.contactDetailsBirthdayReminder.isChecked =
                 intentUtils.isPendingIntentCreated(requireContext(), contact, contactId)
         }
@@ -130,28 +168,30 @@ class ContactDetailsFragment : Fragment() {
             intentUtils.getPendingIntent(requireContext(), contact, contactId)
 
         val currentDate = LocalDate.now()
-        var birthdayDate = LocalDate.of(
-            currentDate.year,
-            contact.birthday.month,
-            contact.birthday.dayOfMonth
-        )
-        if (birthdayDate.isBefore(currentDate)) {
-            birthdayDate = when {
-                birthdayDate.month == Month.FEBRUARY && birthdayDate.dayOfMonth == 29 -> {
-                    when {
-                        birthdayDate.isLeapYear -> birthdayDate.plusYears(4)
-                        else -> birthdayDate.plusYears(4L - birthdayDate.year % 4)
+        if (contact.birthday != null) {
+            var birthdayDate = LocalDate.of(
+                currentDate.year,
+                contact.birthday.month,
+                contact.birthday.dayOfMonth
+            )
+            if (birthdayDate.isBefore(currentDate)) {
+                birthdayDate = when {
+                    birthdayDate.month == Month.FEBRUARY && birthdayDate.dayOfMonth == 29 -> {
+                        when {
+                            birthdayDate.isLeapYear -> birthdayDate.plusYears(4)
+                            else -> birthdayDate.plusYears(4L - birthdayDate.year % 4)
+                        }
                     }
+                    else -> birthdayDate.plusYears(1)
                 }
-                else -> birthdayDate.plusYears(1)
             }
-        }
 
-        alarmManager.set(
-            AlarmManager.RTC_WAKEUP,
-            birthdayDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
-            pendingIntent
-        )
+            alarmManager.set(
+                AlarmManager.RTC_WAKEUP,
+                birthdayDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
+                pendingIntent
+            )
+        }
     }
 
     private fun cancelAlarm() {
