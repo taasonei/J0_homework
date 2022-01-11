@@ -28,6 +28,12 @@ import java.time.format.FormatStyle
 
 class ContactDetailsFragment : Fragment() {
 
+    companion object {
+        private const val TWENTY_NINTH = 29
+        private const val FOUR_YEARS = 4L
+        private const val ONE_YEAR = 1L
+    }
+
     private var _binding: FragmentContactDetailsBinding? = null
     private val binding get() = _binding!!
 
@@ -37,8 +43,6 @@ class ContactDetailsFragment : Fragment() {
     }
 
     private var contact: DetailedContact? = null
-    private val defaultText = ""
-    private val defaultPhoto = R.drawable.example_avatar
 
     private val intentUtils = IntentUtils()
 
@@ -99,50 +103,36 @@ class ContactDetailsFragment : Fragment() {
         if (contact != null) {
             hideProgressBar()
             binding.contactDetailsName.text = contact.name
-            binding.contactDetailsPhone1.text = contact.phone.first()
 
-            binding.contactDetailsPhone2.text = if (contact.phone.size > 1) {
-                contact.phone.last()
-            } else {
-                defaultText
-            }
+            val phone = contact.phone
+            binding.contactDetailsPhone1.text = if (phone.isNotEmpty()) phone.first() else ""
+            binding.contactDetailsPhone2.text =
+                if (phone.isNotEmpty() && phone.size > 1) phone.last() else ""
+
+            val email = contact.email
+            binding.contactDetailsEmail1.text = if (email.isNotEmpty()) email.first() else ""
+            binding.contactDetailsEmail2.text =
+                if (email.isNotEmpty() && email.size > 1) email.last() else ""
 
             if (contact.photo.isNotBlank()) {
                 binding.contactDetailsPhoto.setImageURI(Uri.parse(contact.photo))
             } else {
-                binding.contactDetailsPhoto.setImageResource(defaultPhoto)
+                binding.contactDetailsPhoto.setImageResource(R.drawable.example_avatar)
             }
 
-            binding.contactDetailsDescription.text = if (contact.description.isNotEmpty()) {
-                contact.description
-            } else {
-                defaultText
-            }
-
-            when (contact.email.isNotEmpty()) {
-                true -> {
-                    binding.contactDetailsEmail1.text = contact.email.first()
-                    when (contact.email.size > 1) {
-                        true -> binding.contactDetailsEmail2.text = contact.email.last()
-                        else -> binding.contactDetailsEmail2.text = defaultText
-                    }
-                }
-                else -> {
-                    binding.contactDetailsEmail1.text = defaultText
-                    binding.contactDetailsEmail2.text = defaultText
-                }
-            }
+            binding.contactDetailsDescription.text = contact.description
 
             if (contact.birthday != null) {
                 binding.contactDetailsBirthday.text =
                     DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(contact.birthday)
                 binding.contactDetailsBirthdayReminder.isEnabled = true
             } else {
-                binding.contactDetailsBirthday.text = defaultText
+                binding.contactDetailsBirthday.text = ""
                 binding.contactDetailsBirthdayReminder.isEnabled = false
             }
+
             binding.contactDetailsBirthdayReminder.isChecked =
-                intentUtils.isPendingIntentCreated(requireContext(), contact, contactId)
+                intentUtils.isPendingIntentCreated(requireContext(), contact)
         }
     }
 
@@ -165,7 +155,7 @@ class ContactDetailsFragment : Fragment() {
         val alarmManager: AlarmManager =
             requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent =
-            intentUtils.getPendingIntent(requireContext(), contact, contactId)
+            intentUtils.getPendingIntent(requireContext(), contact)
 
         val currentDate = LocalDate.now()
         if (contact.birthday != null) {
@@ -176,13 +166,13 @@ class ContactDetailsFragment : Fragment() {
             )
             if (birthdayDate.isBefore(currentDate)) {
                 birthdayDate = when {
-                    birthdayDate.month == Month.FEBRUARY && birthdayDate.dayOfMonth == 29 -> {
+                    birthdayDate.month == Month.FEBRUARY && birthdayDate.dayOfMonth == TWENTY_NINTH -> {
                         when {
-                            birthdayDate.isLeapYear -> birthdayDate.plusYears(4)
-                            else -> birthdayDate.plusYears(4L - birthdayDate.year % 4)
+                            birthdayDate.isLeapYear -> birthdayDate.plusYears(FOUR_YEARS)
+                            else -> birthdayDate.plusYears(FOUR_YEARS - birthdayDate.year % FOUR_YEARS)
                         }
                     }
-                    else -> birthdayDate.plusYears(1)
+                    else -> birthdayDate.plusYears(ONE_YEAR)
                 }
             }
 
@@ -200,7 +190,7 @@ class ContactDetailsFragment : Fragment() {
         val alarmManager: AlarmManager =
             requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent =
-            intentUtils.getPendingIntent(requireContext(), contact, contactId)
+            intentUtils.getPendingIntent(requireContext(), contact)
         alarmManager.cancel(pendingIntent)
         pendingIntent.cancel()
     }
