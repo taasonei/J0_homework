@@ -4,7 +4,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import com.github.taasonei.j0_homework.ContactListFragment
+import com.github.taasonei.j0_homework.ui.ContactListFragment
 import com.github.taasonei.j0_homework.model.DetailedContact
 
 class IntentUtils {

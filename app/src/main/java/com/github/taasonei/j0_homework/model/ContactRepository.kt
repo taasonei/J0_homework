@@ -6,9 +6,7 @@ import android.provider.ContactsContract
 import androidx.core.database.getStringOrNull
 import java.time.LocalDate
 
-
-class ContactHelper {
-
+class ContactRepository {
     private val contactUri = ContactsContract.Contacts.CONTENT_URI
     private val phoneUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI
     private val emailUri = ContactsContract.CommonDataKinds.Email.CONTENT_URI

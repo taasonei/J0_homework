@@ -7,12 +7,12 @@
 
     <fragment
         android:id="@+id/contactDetailsFragment"
-        android:name="com.github.taasonei.j0_homework.ContactDetailsFragment"
+        android:name="com.github.taasonei.j0_homework.ui.ContactDetailsFragment"
         android:label="@string/contact_details_fragment"
         tools:layout="@layout/fragment_contact_details" />
     <fragment
         android:id="@+id/contactListFragment"
-        android:name="com.github.taasonei.j0_homework.ContactListFragment"
+        android:name="com.github.taasonei.j0_homework.ui.ContactListFragment"
         android:label="@string/contact_list_fragment"
         tools:layout="@layout/fragment_contact_list" >
         <action

@@ -10,7 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.core.app.NotificationCompat
 import androidx.navigation.NavDeepLinkBuilder
-import com.github.taasonei.j0_homework.ContactListFragment
+import com.github.taasonei.j0_homework.ui.ContactListFragment
 import com.github.taasonei.j0_homework.MainActivity
 import com.github.taasonei.j0_homework.R
 
@@ -18,9 +18,8 @@ class AlarmReceiver : BroadcastReceiver() {
 
     companion object {
         const val CHANNEL_BIRTHDAY = "CHANNEL_BIRTHDAY"
+        private const val NOTIFY_ID = 1
     }
-
-    private val notifyId = 1
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == IntentUtils.SET_ALARM) {
@@ -69,7 +68,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
 
-            notificationManager.notify(contactId, notifyId, builder.build())
+            notificationManager.notify(contactId, NOTIFY_ID, builder.build())
         }
     }
 
