@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ContactDetailsFragment">
+    tools:context=".ui.ContactDetailsFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -133,7 +133,6 @@
             android:layout_marginVertical="@dimen/margin_8dp"
             android:textAppearance="?attr/textAppearanceSubtitle2"
             android:visibility="gone"
-            tools:text="@string/example_long_description"
             tools:visibility="visible" />
 
     </LinearLayout>
