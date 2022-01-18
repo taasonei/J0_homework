@@ -8,4 +8,5 @@
     <string name="read_contacts_permission_message">Для корректной работы приложения необходим доступ к контактам. Вы можете предоставить доступ в настройках</string>
     <string name="settings_button">Настройки</string>
     <string name="exit_button">Выход</string>
+    <string name="search_hint">Поиск контактов</string>
 </resources>

@@ -2,20 +2,20 @@ package com.github.taasonei.j0_homework.ui
 
 import android.Manifest.permission.READ_CONTACTS
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.taasonei.j0_homework.R
+import com.github.taasonei.j0_homework.adapter.ContactAdapter
 import com.github.taasonei.j0_homework.databinding.FragmentContactListBinding
-import com.github.taasonei.j0_homework.model.ShortContact
 import com.github.taasonei.j0_homework.viewmodel.ContactListViewModel
 
 class ContactListFragment : Fragment() {
@@ -24,11 +24,12 @@ class ContactListFragment : Fragment() {
     }
 
     private val viewModel by viewModels<ContactListViewModel>()
+    private var adapter: ContactAdapter? = null
+    private var searchView: SearchView? = null
+    private var pendingQuery: String? = null
 
     private var _binding: FragmentContactListBinding? = null
     private val binding get() = _binding!!
-
-    private var contactId: String? = null
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -37,6 +38,11 @@ class ContactListFragment : Fragment() {
             childFragmentManager,
             ContactPermissionDialog.TAG
         )
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -50,15 +56,52 @@ class ContactListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val cardView = binding.contactCardView
-        cardView.setOnClickListener {
-            val bundle = Bundle()
-            bundle.putString(CONTACT_ID_TAG, contactId)
-            findNavController().navigate(
-                R.id.action_contactListFragment_to_contactDetailsFragment,
-                bundle
-            )
+        adapter = ContactAdapter()
+        val dividerItemDecoration = DividerItemDecoration(
+            requireContext(),
+            LinearLayoutManager.VERTICAL
+        )
+        val drawable = AppCompatResources.getDrawable(requireContext(), R.drawable.divider)
+        if (drawable != null) dividerItemDecoration.setDrawable(drawable)
+        binding.apply {
+            contactListRecyclerView.adapter = adapter
+            contactListRecyclerView.addItemDecoration(dividerItemDecoration)
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.search_menu, menu)
+
+        val searchItem = menu.findItem(R.id.search_bar)
+        searchView = searchItem.actionView as SearchView
+        val search = searchView
+        if (search != null) {
+            search.queryHint = getString(R.string.search_hint)
+            search.maxWidth = Int.MAX_VALUE
+
+            if (!pendingQuery.isNullOrEmpty()) {
+                searchItem.expandActionView()
+                search.setQuery(pendingQuery, false)
+            }
+
+            search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    viewModel.searchContacts(query)
+                    return false
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    viewModel.searchContacts(newText)
+                    return true
+                }
+            })
+        }
+    }
+
+    override fun onDestroyOptionsMenu() {
+        super.onDestroyOptionsMenu()
+        searchView?.setOnQueryTextListener(null)
+        searchView = null
     }
 
     override fun onStart() {
@@ -69,33 +112,24 @@ class ContactListFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        adapter = null
     }
 
     private fun startObservingContacts() {
-        viewModel.contacts.observe(viewLifecycleOwner, { list -> setContactData(list) })
-    }
-
-    private fun setContactData(contacts: List<ShortContact>?) {
-        if (!contacts.isNullOrEmpty()) {
-            hideProgressBar()
-            val firstContact = contacts.first()
-            contactId = firstContact.id
-            binding.apply {
-                contactItemName.text = firstContact.name
-                contactItemPhone.text = firstContact.phone
-                if (firstContact.photo.isNotBlank()) {
-                    contactItemPhoto.setImageURI(Uri.parse(firstContact.photo))
-                } else {
-                    contactItemPhoto.setImageResource(R.drawable.example_avatar)
-                }
+        pendingQuery = viewModel.searchViewQuery.value
+        viewModel.contacts.observe(viewLifecycleOwner, { list ->
+            val contactAdapter = adapter
+            if (contactAdapter != null) {
+                hideProgressBar()
+                contactAdapter.submitList(list)
             }
-        }
+        })
     }
 
     private fun hideProgressBar() {
         binding.apply {
             contactListProgressBar.visibility = View.GONE
-            contactCardView.visibility = View.VISIBLE
+            contactListRecyclerView.visibility = View.VISIBLE
         }
     }
 
@@ -108,7 +142,10 @@ class ContactListFragment : Fragment() {
             ActivityCompat.shouldShowRequestPermissionRationale(
                 requireActivity(),
                 READ_CONTACTS
-            ) -> ContactPermissionDialog().show(childFragmentManager, ContactPermissionDialog.TAG)
+            ) -> ContactPermissionDialog().show(
+                childFragmentManager,
+                ContactPermissionDialog.TAG
+            )
             else -> requestPermissionLauncher.launch(READ_CONTACTS)
         }
     }

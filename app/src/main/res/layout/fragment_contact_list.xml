@@ -11,63 +11,17 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:visibility="visible" />
+        android:visibility="visible"
+        tools:visibility="gone" />
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/contact_card_view"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/contact_list_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/margin_8dp"
-        android:layout_marginTop="@dimen/margin_8dp"
-        android:visibility="gone">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <ImageView
-                android:id="@+id/contact_item_photo"
-                android:layout_width="@dimen/size_128dp"
-                android:layout_height="@dimen/size_128dp"
-                android:layout_marginVertical="@dimen/margin_16dp"
-                android:layout_marginStart="@dimen/margin_16dp"
-                android:layout_marginEnd="@dimen/margin_8dp"
-                android:importantForAccessibility="no"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:src="@tools:sample/avatars" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/contact_item_name"
-                android:layout_width="@dimen/size_0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_8dp"
-                android:layout_marginEnd="@dimen/margin_16dp"
-                android:layout_marginBottom="@dimen/margin_2dp"
-                android:textAppearance="?attr/textAppearanceHeadline6"
-                app:layout_constraintBottom_toTopOf="@id/contact_item_phone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/contact_item_photo"
-                app:layout_constraintTop_toTopOf="@id/contact_item_photo"
-                tools:text="@tools:sample/full_names" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/contact_item_phone"
-                android:layout_width="@dimen/size_0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_8dp"
-                android:layout_marginTop="@dimen/margin_2dp"
-                android:layout_marginEnd="@dimen/margin_16dp"
-                android:textAppearance="?attr/textAppearanceSubtitle1"
-                app:layout_constraintBottom_toBottomOf="@id/contact_item_photo"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/contact_item_photo"
-                app:layout_constraintTop_toBottomOf="@id/contact_item_name"
-                tools:text="@tools:sample/us_phones" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </com.google.android.material.card.MaterialCardView>
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        android:visibility="gone"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/contact_list_item"
+        tools:visibility="visible" />
 
 </LinearLayout>
