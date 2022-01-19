@@ -11,10 +11,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.J0_homework">
-        <service
-            android:name=".service.ContactService"
-            android:enabled="true"
-            android:exported="false" />
         <receiver android:name=".notification.AlarmReceiver">
         </receiver>
         <activity

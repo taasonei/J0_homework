@@ -31,6 +31,12 @@
 
 ## 6. Рефакторинг проекта по паттерну проектирования MVVM либо MVP
 
-- Работа с AlarmManager вынесена в отдельный класс AlarmHelper
+- Работа с AlarmManager вынесена в отдельный класс AlarmRepository
 - Удален ContactService
 - Загрузка данных о контактах реализована во viewmodel. Каждому фрагменту соответствует своя viewmodel
+
+## 7. Переделать экран списка контактов на RecyclerView
+
+- ContactListFragment теперь отображает список контактов. Данные загружаются через ContactListViewModel
+- В ContactRepository теперь можно искать контакты по содержащимся в них символам
+- Добавлен SearchView для поиска контактов в ContactListFragment

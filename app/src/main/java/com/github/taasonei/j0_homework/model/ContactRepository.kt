@@ -2,12 +2,14 @@ package com.github.taasonei.j0_homework.model
 
 import android.content.Context
 import android.database.Cursor
+import android.net.Uri
 import android.provider.ContactsContract
 import androidx.core.database.getStringOrNull
 import java.time.LocalDate
 
 class ContactRepository {
     private val contactUri = ContactsContract.Contacts.CONTENT_URI
+    private val contactFilterUri = ContactsContract.Contacts.CONTENT_FILTER_URI
     private val phoneUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI
     private val emailUri = ContactsContract.CommonDataKinds.Email.CONTENT_URI
     private val dataUri = ContactsContract.Data.CONTENT_URI
@@ -44,12 +46,18 @@ class ContactRepository {
     private val descriptionSelection = "${ContactsContract.Data.CONTACT_ID} = ? AND " +
             "${ContactsContract.CommonDataKinds.Note.MIMETYPE} = ?"
 
-    fun getAllContacts(context: Context): List<ShortContact> {
+    fun getContacts(context: Context, searchString: String?): List<ShortContact> {
         val contactList = mutableListOf<ShortContact>()
+        val contentUri: Uri =
+            if (searchString.isNullOrEmpty()) contactUri else Uri.withAppendedPath(
+                contactFilterUri,
+                Uri.encode(searchString)
+            )
+
         var cursor: Cursor? = null
         try {
             cursor = context.contentResolver.query(
-                contactUri,
+                contentUri,
                 contactProjection,
                 contactWithNumberSelection,
                 arrayOf("1"),

@@ -16,10 +16,21 @@ class ContactListViewModel(application: Application) : AndroidViewModel(applicat
     private val _contacts: MutableLiveData<List<ShortContact>> =
         MutableLiveData<List<ShortContact>>().also {
             viewModelScope.launch(Dispatchers.IO) {
-                it.postValue(contactRepository.getAllContacts(application))
+                it.postValue(contactRepository.getContacts(application, null))
             }
         }
 
     val contacts: LiveData<List<ShortContact>>
         get() = _contacts
+
+    private val _searchViewQuery: MutableLiveData<String> = MutableLiveData("")
+    val searchViewQuery: LiveData<String>
+        get() = _searchViewQuery
+
+    fun searchContacts(searchString: String?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _searchViewQuery.postValue(searchString)
+            _contacts.postValue(contactRepository.getContacts(getApplication(), searchString))
+        }
+    }
 }
