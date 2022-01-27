@@ -8,29 +8,29 @@ import androidx.lifecycle.viewModelScope
 import com.github.taasonei.j0_homework.model.ContactRepository
 import com.github.taasonei.j0_homework.model.ShortContact
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class ContactListViewModel(application: Application) : AndroidViewModel(application) {
     private val contactRepository = ContactRepository()
 
-    private val _contacts: MutableLiveData<List<ShortContact>> =
-        MutableLiveData<List<ShortContact>>().also {
-            viewModelScope.launch(Dispatchers.IO) {
-                it.postValue(contactRepository.getContacts(application, null))
-            }
-        }
-
-    val contacts: LiveData<List<ShortContact>>
+    private var _contacts = MutableStateFlow<State<List<ShortContact>>>(State.Loading())
+    val contacts: StateFlow<State<List<ShortContact>>>
         get() = _contacts
 
     private val _searchViewQuery: MutableLiveData<String> = MutableLiveData("")
     val searchViewQuery: LiveData<String>
         get() = _searchViewQuery
 
-    fun searchContacts(searchString: String?) {
+    fun loadContacts(searchString: String?) {
+        _searchViewQuery.postValue(searchString)
         viewModelScope.launch(Dispatchers.IO) {
-            _searchViewQuery.postValue(searchString)
-            _contacts.postValue(contactRepository.getContacts(getApplication(), searchString))
+            contactRepository.getContacts(getApplication(), searchString)
+                .catch { e -> _contacts.value = State.Error(e.toString()) }
+                .collect { _contacts.value = State.Success(it) }
         }
     }
 }

@@ -7,17 +7,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.github.taasonei.j0_homework.R
 import com.github.taasonei.j0_homework.databinding.FragmentContactDetailsBinding
 import com.github.taasonei.j0_homework.model.DetailedContact
 import com.github.taasonei.j0_homework.notification.IntentUtils
 import com.github.taasonei.j0_homework.viewmodel.ContactDetailsViewModel
 import com.github.taasonei.j0_homework.viewmodel.ModelFactory
+import com.github.taasonei.j0_homework.viewmodel.State
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -55,6 +60,11 @@ class ContactDetailsFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.contactDetailsReload.setOnClickListener { startObservingContact() }
+    }
+
     override fun onStart() {
         super.onStart()
         checkPermissionGranted()
@@ -66,7 +76,25 @@ class ContactDetailsFragment : Fragment() {
     }
 
     private fun startObservingContact() {
-        viewModel.contact.observe(viewLifecycleOwner, { value -> setContactData(value) })
+        viewModel.loadContact()
+        viewModel.contact
+            .onEach { state ->
+                when (state) {
+                    is State.Success<DetailedContact?> -> setContactData(state.data)
+                    is State.Error -> {
+                        hideProgressBar()
+                        binding.contactDetailsReload.visibility = View.VISIBLE
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.something_went_wrong),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    is State.Loading -> showProgressBar()
+                }
+            }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
+
         val switch = binding.contactDetailsBirthdayReminder
         switch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
@@ -128,6 +156,23 @@ class ContactDetailsFragment : Fragment() {
             contactDetailsBirthday.visibility = View.VISIBLE
             contactDetailsBirthdayReminder.visibility = View.VISIBLE
             contactDetailsDescription.visibility = View.VISIBLE
+            contactDetailsReload.visibility = View.GONE
+        }
+    }
+
+    private fun showProgressBar() {
+        binding.apply {
+            contactDetailsProgressBar.visibility = View.VISIBLE
+            contactDetailsName.visibility = View.GONE
+            contactDetailsPhoto.visibility = View.GONE
+            contactDetailsPhone1.visibility = View.GONE
+            contactDetailsPhone2.visibility = View.GONE
+            contactDetailsEmail1.visibility = View.GONE
+            contactDetailsEmail2.visibility = View.GONE
+            contactDetailsBirthday.visibility = View.GONE
+            contactDetailsBirthdayReminder.visibility = View.GONE
+            contactDetailsDescription.visibility = View.GONE
+            contactDetailsReload.visibility = View.GONE
         }
     }
 

@@ -5,6 +5,8 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.ContactsContract
 import androidx.core.database.getStringOrNull
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import java.time.LocalDate
 
 class ContactRepository {
@@ -46,14 +48,13 @@ class ContactRepository {
     private val descriptionSelection = "${ContactsContract.Data.CONTACT_ID} = ? AND " +
             "${ContactsContract.CommonDataKinds.Note.MIMETYPE} = ?"
 
-    fun getContacts(context: Context, searchString: String?): List<ShortContact> {
+    fun getContacts(context: Context, searchString: String?): Flow<List<ShortContact>> = flow {
         val contactList = mutableListOf<ShortContact>()
         val contentUri: Uri =
             if (searchString.isNullOrEmpty()) contactUri else Uri.withAppendedPath(
                 contactFilterUri,
                 Uri.encode(searchString)
             )
-
         var cursor: Cursor? = null
         try {
             cursor = context.contentResolver.query(
@@ -86,10 +87,10 @@ class ContactRepository {
         } finally {
             cursor?.close()
         }
-        return contactList
+        emit(contactList)
     }
 
-    fun getContactById(context: Context, id: String): DetailedContact? {
+    fun getContactById(context: Context, id: String): Flow<DetailedContact?> = flow {
         var contact: DetailedContact? = null
         var cursor: Cursor? = null
         try {
@@ -123,7 +124,7 @@ class ContactRepository {
         } finally {
             cursor?.close()
         }
-        return contact
+        emit(contact)
     }
 
     private fun getPhoneNumbers(context: Context, id: String): List<String> {
